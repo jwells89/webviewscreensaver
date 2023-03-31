@@ -22,8 +22,8 @@
 #import "WVSSAddressListFetcher.h"
 
 @interface WVSSAddressListFetcher ()
-@property(nonatomic, strong) NSMutableData *receivedData;
-@property(nonatomic, strong) NSURLConnection *connection;
+@property(nonatomic, strong) NSData *receivedData;
+@property(nonatomic, strong) NSURLSessionDownloadTask *downloadTask;
 @end
 
 @implementation WVSSAddressListFetcher
@@ -32,49 +32,49 @@
   self = [super init];
   if (self) {
     NSURLRequest *request = [NSURLRequest requestWithURL:[NSURL URLWithString:url]];
-    [self.connection cancel];
-    self.connection = [NSURLConnection connectionWithRequest:request delegate:self];
-    [self.connection start];
+    [self.downloadTask cancel];
+    self.downloadTask = [[NSURLSession sharedSession] downloadTaskWithRequest:request];
+    [self.downloadTask setDelegate:self];
+    [self.downloadTask resume];
     NSLog(@"fetching URLs started");
   }
   return self;
 }
 
-- (void)connection:(NSURLConnection *)connection didFailWithError:(NSError *)error {
-  NSLog(@"Unable to fetch URLs: %@", error);
-  self.connection = nil;
+- (void)URLSession:(NSURLSession *)session didBecomeInvalidWithError:(NSError *)error {
+    NSLog(@"Unable to fetch URLs: %@", error);
+    self.downloadTask = nil;
 }
 
-- (void)connection:(NSURLConnection *)connection didReceiveResponse:(NSURLResponse *)response {
-  self.receivedData = [NSMutableData data];
+- (void)URLSession:(NSURLSession *)session task:(NSURLSessionTask *)task didCompleteWithError:(NSError *)error {
+    NSLog(@"Unable to fetch URLs: %@", error);
+    self.downloadTask = nil;
 }
 
-- (void)connection:(NSURLConnection *)connection didReceiveData:(NSData *)data {
-  [self.receivedData appendData:data];
-}
+- (void)URLSession:(NSURLSession *)session downloadTask:(NSURLSessionDownloadTask *)downloadTask didFinishDownloadingToURL:(NSURL *)location {
+    self.receivedData = [NSData dataWithContentsOfURL:location];
+    
+    NSError *jsonError = nil;
+    id response = [NSJSONSerialization JSONObjectWithData:self.receivedData
+                                                  options:NSJSONReadingMutableContainers
+                                                    error:&jsonError];
+    if (jsonError) {
+      NSLog(@"Unable to read connection data: %@", jsonError);
+        self.downloadTask = nil;
+      [self.delegate addressListFetcher:self didFailWithError:jsonError];
+      return;
+    }
 
-- (void)connectionDidFinishLoading:(NSURLConnection *)connection {
-  NSError *jsonError = nil;
-  id response = [NSJSONSerialization JSONObjectWithData:self.receivedData
-                                                options:NSJSONReadingMutableContainers
-                                                  error:&jsonError];
-  if (jsonError) {
-    NSLog(@"Unable to read connection data: %@", jsonError);
-    self.connection = nil;
-    [self.delegate addressListFetcher:self didFailWithError:jsonError];
-    return;
-  }
+    if (![response isKindOfClass:[NSArray class]]) {
+      NSLog(@"Expected array but got %@", [response class]);
+        self.downloadTask = nil;
+      [self.delegate addressListFetcher:self didFailWithError:nil];
+      return;
+    }
 
-  if (![response isKindOfClass:[NSArray class]]) {
-    NSLog(@"Expected array but got %@", [response class]);
-    self.connection = nil;
-    [self.delegate addressListFetcher:self didFailWithError:nil];
-    return;
-  }
-
-  [self.delegate addressListFetcher:self didFinishWithArray:response];
-  self.connection = nil;
-  NSLog(@"fetching URLS finished");
+    [self.delegate addressListFetcher:self didFinishWithArray:response];
+    self.downloadTask = nil;
+    NSLog(@"fetching URLS finished");
 }
 
 @end

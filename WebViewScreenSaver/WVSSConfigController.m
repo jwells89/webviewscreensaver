@@ -26,7 +26,7 @@
 
 #import <WebKit/WebKit.h>
 
-static NSString *const kURLTableRow = @"kURLTableRow";
+static NSString *const kURLTableRow = @"WebViewScreenSaver.TableRow";
 // Configuration sheet columns.
 static NSString *const kTableColumnURL = @"url";
 static NSString *const kTableColumnTime = @"time";
@@ -226,31 +226,31 @@ NS_ENUM(NSInteger, WVSSColumn){kWVSSColumnURL = 0, kWVSSColumnDuration = 1};
   return YES;
 }
 
-- (BOOL)tableView:(NSTableView *)tv
-    writeRowsWithIndexes:(NSIndexSet *)rowIndexes
-            toPasteboard:(NSPasteboard *)pboard {
-  // Copy the row numbers to the pasteboard.
-  NSData *serializedIndexes = [NSKeyedArchiver archivedDataWithRootObject:rowIndexes];
-  [pboard declareTypes:[NSArray arrayWithObject:kURLTableRow] owner:self];
-  [pboard setData:serializedIndexes forType:kURLTableRow];
-  return YES;
+- (id<NSPasteboardWriting>)tableView:(NSTableView *)tableView pasteboardWriterForRow:(NSInteger)row {
+    NSPasteboardItem *pasteboardItem = [[NSPasteboardItem alloc] init];
+    [pasteboardItem setString:[@(row) stringValue] forType: kURLTableRow];
+    
+    return pasteboardItem;
 }
 
 - (NSDragOperation)tableView:(NSTableView *)tv
                 validateDrop:(id)info
                  proposedRow:(NSInteger)row
        proposedDropOperation:(NSTableViewDropOperation)op {
-  // Add code here to validate the drop
-  return NSDragOperationEvery;
+    if (op == NSTableViewDropAbove) {
+        return NSDragOperationMove;
+    } else {
+        return NSDragOperationNone;
+    }
 }
 
 - (BOOL)tableView:(NSTableView *)aTableView
        acceptDrop:(id)info
               row:(NSInteger)row
     dropOperation:(NSTableViewDropOperation)operation {
-  NSPasteboard *pboard = [info draggingPasteboard];
-  NSData *rowData = [pboard dataForType:kURLTableRow];
-  NSIndexSet *rowIndexes = [NSKeyedUnarchiver unarchiveObjectWithData:rowData];
+  NSPasteboardItem *pboardItem = [[[info draggingPasteboard] pasteboardItems] firstObject];
+  NSString *rowString = [pboardItem stringForType: kURLTableRow];
+    NSIndexSet *rowIndexes = [NSIndexSet indexSetWithIndex:[rowString integerValue]];
   NSInteger dragRow = [rowIndexes firstIndex];
 
   NSMutableArray *addresses = self.config.addresses;
@@ -259,14 +259,15 @@ NS_ENUM(NSInteger, WVSSColumn){kWVSSColumnURL = 0, kWVSSColumnDuration = 1};
   if (dragRow < row) {
     [addresses insertObject:draggedObject atIndex:row];
     [addresses removeObjectAtIndex:dragRow];
-    //[self.urlList noteNumberOfRowsChanged];
-    [self.urlTable reloadData];
   } else {
     [addresses removeObjectAtIndex:dragRow];
     [addresses insertObject:draggedObject atIndex:row];
-    //[self.urlList noteNumberOfRowsChanged];
-    [self.urlTable reloadData];
   }
+    
+    [aTableView beginUpdates];
+    [aTableView moveRowAtIndex:rowIndexes.firstIndex toIndex:row];
+    [aTableView endUpdates];
+    
   return YES;
 }
 

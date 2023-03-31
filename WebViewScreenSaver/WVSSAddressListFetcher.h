@@ -23,7 +23,7 @@
 
 @protocol WVSSAddressListFetcherDelegate;
 
-@interface WVSSAddressListFetcher : NSObject
+@interface WVSSAddressListFetcher : NSObject <NSURLSessionTaskDelegate, NSURLSessionDownloadDelegate>
 @property(nonatomic, weak) id<WVSSAddressListFetcherDelegate> delegate;
 
 - (id)initWithURL:(NSString *)url;

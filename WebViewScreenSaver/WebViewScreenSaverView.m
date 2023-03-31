@@ -186,7 +186,7 @@ static NSTimeInterval const kOneMinute = 60.0;
 
 - (void)loadURLThing:(NSString *)urlString {
   NSString *escapedUrlString =
-      [urlString stringByAddingPercentEscapesUsingEncoding:NSUTF8StringEncoding];
+    [urlString stringByAddingPercentEncodingWithAllowedCharacters:[NSCharacterSet URLFragmentAllowedCharacterSet]];
   NSURL *url = [NSURL URLWithString:urlString];
 
   if (url.scheme == nil) {
