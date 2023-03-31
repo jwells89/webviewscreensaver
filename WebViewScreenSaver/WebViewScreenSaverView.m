@@ -112,6 +112,7 @@ static NSTimeInterval const kOneMinute = 60.0;
   _webView = [[WKWebView alloc] initWithFrame:[self bounds] configuration:configuration];
   _webView.UIDelegate = self;
   _webView.navigationDelegate = self;
+  _webView.customUserAgent = @"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/16.1 Safari/605.1.15";
   [_webView setAutoresizingMask:NSViewWidthSizable | NSViewHeightSizable];
   [_webView setAutoresizesSubviews:YES];
   [self addSubview:_webView];
