@@ -1,42 +1,19 @@
 # WebViewScreenSaver
-[![Build](https://img.shields.io/github/workflow/status/liquidx/webviewscreensaver/CI)](https://github.com/liquidx/webviewscreensaver/actions)
-[![GitHub release](https://img.shields.io/github/v/release/liquidx/webviewscreensaver)](https://github.com/liquidx/webviewscreensaver/releases)
+[![GitHub release](https://img.shields.io/github/v/release/jwells89/webviewscreensaver)](https://github.com/jwells89/webviewscreensaver/releases)
 
 A macOS screen saver that displays a web page or a series of web pages.
 
+This is a fork of the [original by liquidx](https://github.com/liquidx/webviewscreensaver) that makes the following changes:
+- Fixes several deprecations (e.g. replacing `NSURLConnection` with `NSURLSession`)
+- Sets the webview’s user agent string to that of Safari so more pages render correctly (many sites treat the default user agent as an obsolete browser)
+- New thumbnail that’s a bit more eye-catching (no retina unfortunately - a 2x thumbnail is supplied, but a bug in the screen saver prefpane prevents it from rendering)
+- Minimum macOS version raised to 12.0 Monterey
+
+
 ## Installation
 
-* Using [brew](https://brew.sh/).&#42;
+Download the latest [release](https://github.com/jwells89/webviewscreensaver/releases), unpack and double-click to install. Binary is signed so gatekeeper shouldn’t grouch at you.
 
-``` bash
-brew install --cask webviewscreensaver
-```
-
-* Directly from the [releases](https://github.com/liquidx/webviewscreensaver/releases) page. Unpack and double click to install.&#42;
-
-* From source (requires [Xcode](https://developer.apple.com/xcode/)):
-``` bash
-/bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/liquidx/webviewscreensaver/master/install-from-source.sh)"
-```
-
-**&#42;Note**: The package is **adhoc signed** (since v2.2.1, previously unsigned).
-
-When opening it the first time you will get a security prompt about Apple not being able to verify the software. <br />
-Hit **ok** (cancel in older macOS) and go to **Security and Privacy**.<br />
-In the section explaining that "WebViewScreenSaver.saver" was blocked click **Open Anyway**.<br />
-Upon returning to screensaver options you'll get a second prompt that can be confirmed by clicking **Open**.
-
-**Alternatively**:
-
-* if you are using [brew](https://brew.sh/) pass in `--no-quarantine` option to `install` or `reinstall` command:
-``` bash
-brew install --cask webviewscreensaver --no-quarantine
-```
-
-* or if you installed it via direct download run the folllowing command to remove the file from quarantine:
-``` bash
-xattr -d com.apple.quarantine WebViewScreenSaver.saver
-```
 
 ## Configuration
 
