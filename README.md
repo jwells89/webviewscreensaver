@@ -12,7 +12,7 @@ This is a fork of the [original by liquidx](https://github.com/liquidx/webviewsc
 
 ## Installation
 
-Download the latest [release](https://github.com/jwells89/webviewscreensaver/releases), unpack and double-click to install. Binary is signed so gatekeeper shouldn’t grouch at you.
+Download the latest [release](https://github.com/jwells89/webviewscreensaver/releases), unpack and double-click to install. Binary is signed and notarized so gatekeeper shouldn’t grouch at you.
 
 
 ## Configuration
